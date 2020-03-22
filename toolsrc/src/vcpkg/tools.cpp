@@ -186,7 +186,7 @@ namespace vcpkg
         {
             System::print2("Downloading ", tool_name, "...\n");
             System::print2("  ", tool_data.url, " -> ", tool_data.download_path.u8string(), "\n");
-            Downloads::download_file(fs, tool_data.url, tool_data.download_path, tool_data.sha512);
+            Downloads::download_file(fs, tool_data.url, tool_data.download_path, tool_data.sha512, paths.scripts);
         }
         else
         {

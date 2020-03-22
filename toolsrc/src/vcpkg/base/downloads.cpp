@@ -171,7 +171,8 @@ namespace vcpkg::Downloads
     void download_file(vcpkg::Files::Filesystem& fs,
                        const std::string& url,
                        const fs::path& download_path,
-                       const std::string& sha512)
+                       const std::string& sha512,
+                       const fs::path& script_path)
     {
         const std::string download_path_part = download_path.u8string() + ".part";
         auto download_path_part_path = fs::u8path(download_path_part);
@@ -179,12 +180,17 @@ namespace vcpkg::Downloads
         fs.remove(download_path, ec);
         fs.remove(download_path_part_path, ec);
 #if defined(_WIN32)
+/*
         auto url_no_proto = url.substr(8); // drop https://
         auto path_begin = Util::find(url_no_proto, '/');
         std::string hostname(url_no_proto.begin(), path_begin);
         std::string path(path_begin, url_no_proto.end());
 
         winhttp_download_file(fs, download_path_part, hostname, path);
+*/
+        const auto code = System::cmd_execute(
+            Strings::format(R"(powershell -NoProfile -ExecutionPolicy Unrestricted -File %s/httpdownloader.ps1 %s %s)", script_path.string(), url, download_path_part));
+        Checks::check_exit(VCPKG_LINE_INFO, code == 0, "Could not download %s", url);
 #else
         const auto code = System::cmd_execute(
             Strings::format(R"(curl -L '%s' --create-dirs --output '%s')", url, download_path_part));
